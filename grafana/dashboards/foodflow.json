@@ -1,0 +1,89 @@
+{
+  "uid": "foodflow",
+  "title": "FoodFlow · Telemetria das APIs",
+  "description": "Indicadores das APIs de Cardápio e Pedidos coletados pelo Prometheus.",
+  "schemaVersion": 39,
+  "tags": ["foodflow"],
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Coleta pelo Prometheus",
+      "description": "Conectividade do Prometheus com cada API. Um alvo ativo tem valor 1.",
+      "datasource": { "type": "prometheus", "uid": "foodflow-prometheus" },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 5 },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "Indisponível", "color": "red" },
+                "1": { "text": "Ativa", "color": "green" }
+              }
+            }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=~\"cardapio|pedidos\"}",
+          "legendFormat": "{{job}}",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Requisições desde a inicialização da API",
+      "datasource": { "type": "prometheus", "uid": "foodflow-prometheus" },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 5 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (job) (http_requests_total{job=~\"cardapio|pedidos\",rota!=\"/health\"})",
+          "legendFormat": "{{job}}",
+          "instant": true,
+          "range": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Requisições por segundo e status HTTP",
+      "datasource": { "type": "prometheus", "uid": "foodflow-prometheus" },
+      "gridPos": { "x": 0, "y": 5, "w": 12, "h": 9 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "min": 0 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (job, status) (rate(http_requests_total{job=~\"cardapio|pedidos\",rota!=\"/health\"}[1m]))",
+          "legendFormat": "{{job}} · {{status}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Latência p95 das requisições",
+      "description": "Percentil 95 da duração das requisições nos últimos cinco minutos.",
+      "datasource": { "type": "prometheus", "uid": "foodflow-prometheus" },
+      "gridPos": { "x": 12, "y": 5, "w": 12, "h": 9 },
+      "fieldConfig": { "defaults": { "unit": "s", "min": 0 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_request_duration_seconds_bucket{job=~\"cardapio|pedidos\",rota!=\"/health\"}[5m])))",
+          "legendFormat": "{{job}}"
+        }
+      ]
+    }
+  ]
+}

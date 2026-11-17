@@ -1,0 +1,175 @@
+
+services:
+  cardapio-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: cardapio_db
+      POSTGRES_USER: cardapio_user
+      POSTGRES_PASSWORD: ${CARDAPIO_DB_PASSWORD:-cardapio-local}
+    networks:
+      - cardapio-data
+    volumes:
+      - cardapio_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U cardapio_user -d cardapio_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pedidos-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pedidos_db
+      POSTGRES_USER: pedidos_user
+      POSTGRES_PASSWORD: ${PEDIDOS_DB_PASSWORD:-pedidos-local}
+    networks:
+      - pedidos-data
+    volumes:
+      - pedidos_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U pedidos_user -d pedidos_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  cardapio-service:
+    build: ./cardapio-service
+    environment:
+      DB_HOST: cardapio-db
+      DB_PORT: 5432
+      DB_NAME: cardapio_db
+      DB_USER: cardapio_user
+      DB_PASSWORD: ${CARDAPIO_DB_PASSWORD:-cardapio-local}
+    networks:
+      - default
+      - cardapio-data
+    depends_on:
+      cardapio-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  pedidos-service:
+    build: ./pedidos-service
+    environment:
+      DB_HOST: pedidos-db
+      DB_PORT: 5432
+      DB_NAME: pedidos_db
+      DB_USER: pedidos_user
+      DB_PASSWORD: ${PEDIDOS_DB_PASSWORD:-pedidos-local}
+      CARDAPIO_URL: http://cardapio-service:8000
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-foodflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbitmq-local}
+    networks:
+      - default
+      - pedidos-data
+    depends_on:
+      pedidos-db:
+        condition: service_healthy
+      cardapio-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health', {signal: AbortSignal.timeout(2000)}).then(r => { process.exitCode = r.ok ? 0 : 1; }).catch(() => { process.exitCode = 1; })"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  gateway:
+    image: nginx:1.28-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      cardapio-service:
+        condition: service_healthy
+      pedidos-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    depends_on:
+      - cardapio-service
+      - pedidos-service
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-grafana-local}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    hostname: rabbitmq
+    ports:
+      - "127.0.0.1:15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-foodflow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-rabbitmq-local}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  cardapio-consumer:
+    build: ./cardapio-service
+    command: ["python", "-u", "consumidor.py"]
+    environment:
+      DB_HOST: cardapio-db
+      DB_PORT: 5432
+      DB_NAME: cardapio_db
+      DB_USER: cardapio_user
+      DB_PASSWORD: ${CARDAPIO_DB_PASSWORD:-cardapio-local}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-foodflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbitmq-local}
+    networks:
+      - default
+      - cardapio-data
+    depends_on:
+      cardapio-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+networks:
+  cardapio-data:
+    internal: true
+  pedidos-data:
+    internal: true
+
+volumes:
+  cardapio_data:
+  pedidos_data:
+  prometheus_data:
+  grafana_data:
+  rabbitmq_data:

@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FoodFlow</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>FoodFlow</h1>
+        <p>Sistema de gerenciamento de pedidos</p>
+    </header>
+
+    <nav>
+        <button onclick="mostrarTela('cardapio')">Cardápio</button>
+        <button onclick="mostrarTela('novo-pedido')">Novo Pedido</button>
+        <button onclick="mostrarTela('pedidos')">Pedidos</button>
+        <button onclick="mostrarTela('estatisticas')">Estatísticas</button>
+    </nav>
+
+    <main>
+
+        <!-- TELA DE CARDÁPIO -->
+        <section id="cardapio" class="tela">
+            <h2>Gerenciar Cardápio</h2>
+
+            <form id="form-produto">
+                <h3>Cadastro de Produto</h3>
+
+                <input type="hidden" id="produto-id">
+
+                <label for="nome">Nome do produto</label>
+                <input type="text" id="nome" required maxlength="100">
+
+                <label for="descricao">Descrição</label>
+                <textarea id="descricao" required></textarea>
+
+                <label for="preco">Preço (R$)</label>
+                <input type="number" id="preco" min="0.01" step="0.01" required>
+
+                <label>
+                    <input type="checkbox" id="disponivel" checked>
+                    Produto disponível
+                </label>
+
+                <div class="acoes">
+                    <button type="submit" id="botao-salvar">Salvar Produto</button>
+                    <button type="button" id="cancelar-edicao" class="secundario" hidden>
+                        Cancelar edição
+                    </button>
+                </div>
+            </form>
+
+            <h3>Produtos Cadastrados</h3>
+
+            <div class="tabela-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Disponibilidade</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-produtos"></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- TELA DE NOVO PEDIDO -->
+        <section id="novo-pedido" class="tela" hidden>
+            <h2>Novo Pedido</h2>
+
+            <form id="form-pedido">
+                <label for="cliente">Nome do cliente</label>
+                <input type="text" id="cliente" required maxlength="100">
+
+                <label for="produto-pedido">Produto</label>
+                <select id="produto-pedido"></select>
+
+                <label for="quantidade">Quantidade</label>
+                <input type="number" id="quantidade" min="1" value="1">
+
+                <button type="button" id="adicionar-item">
+                    Adicionar ao pedido
+                </button>
+
+                <h3>Itens do Pedido</h3>
+                <div id="itens-pedido"></div>
+
+                <h3>Total estimado: <span id="total-pedido">R$ 0,00</span></h3>
+
+                <button type="submit" id="confirmar-pedido">Confirmar Pedido</button>
+                <p id="retorno-pedido" role="status" hidden></p>
+            </form>
+        </section>
+
+        <section id="estatisticas" class="tela" hidden>
+            <h2>Estatísticas dos Pedidos</h2>
+            <p>Histórico de unidades pedidas por produto. As quantidades são atualizadas após o processamento dos eventos.</p>
+            <button type="button" id="atualizar-estatisticas">Atualizar Estatísticas</button>
+            <p id="retorno-estatisticas" role="status"></p>
+            <div class="tabela-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">ID do produto</th>
+                            <th scope="col">Unidades pedidas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-estatisticas"></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- TELA DE PEDIDOS -->
+        <section id="pedidos" class="tela" hidden>
+            <h2>Acompanhar Pedidos</h2>
+
+            <div id="lista-pedidos"></div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>FoodFlow — Projeto de Sistemas Distribuídos</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "cardapio"
+    static_configs:
+      - targets:
+          - "cardapio-service:8000"
+
+  - job_name: "pedidos"
+    static_configs:
+      - targets:
+          - "pedidos-service:3000"
