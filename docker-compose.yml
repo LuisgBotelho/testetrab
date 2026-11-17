@@ -12,6 +12,7 @@ services:
       - cardapio_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U cardapio_user -d cardapio_db"]
+      start_period: 60s
       interval: 5s
       timeout: 5s
       retries: 10
@@ -28,6 +29,7 @@ services:
       - pedidos_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U pedidos_user -d pedidos_db"]
+      start_period: 60s
       interval: 5s
       timeout: 5s
       retries: 10
@@ -135,7 +137,9 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      # Use o mesmo usuário do broker para preservar o dono do cookie Erlang.
+      test: ["CMD", "gosu", "rabbitmq", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      start_period: 60s
       interval: 10s
       timeout: 10s
       retries: 10
