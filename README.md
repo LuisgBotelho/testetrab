@@ -5,7 +5,8 @@ Sistema Distribuído de Gerenciamento de Pedidos para Restaurantes.
 
 ## Integrantes
 
-Nomes da dupla a confirmar.
+- Luis Henrique Gonzaga Botelho
+- Pedro Rodrigues Rocha
 
 ## 1. Sobre o projeto
 
