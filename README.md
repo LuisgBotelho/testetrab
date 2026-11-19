@@ -1,4 +1,3 @@
-
 # FoodFlow
 
 Sistema Distribuído de Gerenciamento de Pedidos para Restaurantes.
@@ -6,6 +5,7 @@ Sistema Distribuído de Gerenciamento de Pedidos para Restaurantes.
 ## Integrantes
 
 - Luis Henrique Gonzaga Botelho
+
 - Pedro Rodrigues Rocha
 
 ## 1. Sobre o projeto
@@ -36,6 +36,7 @@ A aplicação simula o gerenciamento de um restaurante, permitindo cadastrar pro
 O FoodFlow utiliza dois microsserviços principais, desenvolvidos em linguagens diferentes.
 
 ```mermaid
+
 flowchart LR
     Navegador -->|HTTP| Gateway[NGINX]
     Gateway -->|/produtos e /estatisticas| Cardapio[Cardápio · Python]
@@ -49,6 +50,7 @@ flowchart LR
     Prometheus -->|/metrics| Cardapio
     Prometheus -->|/metrics| Pedidos
     Grafana --> Prometheus
+
 ```
 
 ### Microsserviço de Cardápio
@@ -58,11 +60,17 @@ Desenvolvido em Python utilizando FastAPI.
 Responsabilidades:
 
 - Cadastrar produtos.
+
 - Listar produtos.
+
 - Consultar produtos pelo identificador.
+
 - Atualizar informações e disponibilidade.
+
 - Excluir produtos.
+
 - Disponibilizar dados para o serviço de Pedidos.
+
 - Consultar estatísticas dos produtos solicitados.
 
 Esse microsserviço utiliza exclusivamente seu banco PostgreSQL, denominado `cardapio_db`.
@@ -74,12 +82,19 @@ Desenvolvido em JavaScript utilizando Node.js e Express.
 Responsabilidades:
 
 - Criar pedidos.
+
 - Listar pedidos.
+
 - Consultar pedidos pelo identificador.
+
 - Atualizar o status dos pedidos.
+
 - Excluir pedidos.
+
 - Consultar preços e disponibilidade no serviço de Cardápio.
+
 - Calcular o valor total.
+
 - Publicar eventos no RabbitMQ.
 
 Esse microsserviço utiliza exclusivamente seu banco PostgreSQL, denominado `pedidos_db`.
@@ -94,7 +109,7 @@ O valor total do pedido é calculado utilizando os preços retornados pelo Card�
 
 ### Comunicação assíncrona
 
-O serviço de Pedidos grava o pedido e o evento `PedidoCriado` na mesma operação no PostgreSQL. Uma rotina de publicação lê os eventos pendentes (*outbox*) e envia ao RabbitMQ. Se o broker estiver indisponível, o evento continua pendente para nova tentativa.
+O serviço de Pedidos grava o pedido e o evento `PedidoCriado` na mesma operação no PostgreSQL. Uma rotina de publicação lê os eventos pendentes (**outbox**) e envia ao RabbitMQ. Se o broker estiver indisponível, o evento continua pendente para nova tentativa.
 
 Um consumidor Python independente recebe esse evento e registra estatísticas no banco do Cardápio.
 
@@ -105,25 +120,37 @@ Caso o consumidor esteja temporariamente indisponível, mensagens persistentes p
 ### Gerenciamento de produtos
 
 - Cadastro de produtos.
+
 - Listagem do cardápio.
+
 - Atualização de nome, descrição e preço.
+
 - Controle de disponibilidade.
+
 - Exclusão de produtos.
 
 ### Gerenciamento de pedidos
 
 - Criação de pedidos com múltiplos produtos.
+
 - Consulta de pedidos cadastrados.
+
 - Cálculo automático do total.
+
 - Atualização do status.
+
 - Exclusão de pedidos.
 
 Os status disponíveis são:
 
 - Pendente.
+
 - Em preparo.
+
 - Pronto.
+
 - Entregue.
+
 - Cancelado.
 
 ### Estatísticas
@@ -137,8 +164,11 @@ O Prometheus coleta métricas HTTP das duas APIs.
 As métricas podem ser consultadas no Prometheus e visualizadas no Grafana, permitindo acompanhar:
 
 - Quantidade de requisições.
+
 - Códigos de resposta HTTP.
+
 - Tempo de resposta.
+
 - Disponibilidade dos serviços.
 
 ## 5. Requisitos para execução
@@ -146,8 +176,11 @@ As métricas podem ser consultadas no Prometheus e visualizadas no Grafana, perm
 É necessário possuir:
 
 - Git.
+
 - Docker Desktop ou Docker Engine.
+
 - Docker Compose.
+
 - Navegador web.
 
 No Windows, recomenda-se utilizar Docker Desktop com contêineres Linux e WSL 2.
@@ -160,9 +193,18 @@ O computador também precisa ter conexão com a internet na primeira execução 
 
 ### Passo 1 - Clonar o repositório
 
-Abra um terminal e execute:
+Abra o Git Bash ou o PowerShell e execute a versão correspondente:
+
+**Git Bash:**
 
 ```bash
+git clone https://github.com/LuisgBotelho/testetrab.git
+cd testetrab
+```
+
+**PowerShell:**
+
+```powershell
 git clone https://github.com/LuisgBotelho/testetrab.git
 cd testetrab
 ```
@@ -171,21 +213,59 @@ cd testetrab
 
 O Compose já tem valores para a demonstração local, espelhados no `.env.example`. Para personalizá-los, copie `.env.example` para `.env` antes da primeira subida. O Git ignora o `.env`.
 
+**Git Bash:**
+
+```bash
+cp .env.example .env
+```
+
+**PowerShell:**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edite o arquivo `.env` conforme necessário antes de iniciar os contêineres. Para utilizar os valores de demonstração definidos no Compose, a cópia é opcional.
+
 ### Passo 3 - Verificar o Docker
 
 Execute:
+
+**Git Bash:**
 
 ```bash
 docker --version
 ```
 
+**PowerShell:**
+
+```powershell
+docker --version
+```
+
+**Git Bash:**
+
 ```bash
+docker compose version
+```
+
+**PowerShell:**
+
+```powershell
 docker compose version
 ```
 
 Verifique se o Docker Engine está funcionando:
 
+**Git Bash:**
+
 ```bash
+docker info
+```
+
+**PowerShell:**
+
+```powershell
 docker info
 ```
 
@@ -193,7 +273,15 @@ docker info
 
 Na raiz do projeto, execute:
 
+**Git Bash:**
+
 ```bash
+docker compose up --build --wait --wait-timeout 240
+```
+
+**PowerShell:**
+
+```powershell
 docker compose up --build --wait --wait-timeout 240
 ```
 
@@ -205,20 +293,36 @@ Na primeira execução, o processo pode demorar alguns minutos devido ao downloa
 
 Execute:
 
+**Git Bash:**
+
 ```bash
+docker compose ps
+```
+
+**PowerShell:**
+
+```powershell
 docker compose ps
 ```
 
 Os seguintes serviços deverão estar em execução:
 
 - cardapio-db
+
 - pedidos-db
+
 - cardapio-service
+
 - pedidos-service
+
 - gateway
+
 - prometheus
+
 - grafana
+
 - rabbitmq
+
 - cardapio-consumer
 
 ### Passo 6 - Validar as funções
@@ -227,15 +331,32 @@ Na interface, crie um produto disponível e faça um pedido com duas unidades. C
 
 Para validar automaticamente os dois CRUDs, a entrega do evento e as métricas coletadas pelo Prometheus, execute com Python 3 na raiz do clone:
 
+**Git Bash:**
+
 ```bash
 python testes/smoke.py
+```
+
+**PowerShell:**
+
+```powershell
+py -3 testes/smoke.py
 ```
 
 No Windows, `py -3 testes/smoke.py` é uma alternativa quando o Python está disponível pelo launcher. Em uma pilha local dedicada, acrescente `--testar-retentativa` para parar o RabbitMQ brevemente e verificar que um pedido feito durante a interrupção chega às estatísticas após a volta do broker. Se iniciou o Compose com um nome de projeto personalizado, use o mesmo nome em `COMPOSE_PROJECT_NAME` ao rodar esse teste.
 
 O teste básico também pode rodar no Python que já vem no contêiner:
 
+**Git Bash:**
+
 ```bash
+docker compose cp testes/smoke.py cardapio-service:/tmp/foodflow-smoke.py
+docker compose exec -T cardapio-service python /tmp/foodflow-smoke.py --gateway http://gateway --prometheus http://prometheus:9090
+```
+
+**PowerShell:**
+
+```powershell
 docker compose cp testes/smoke.py cardapio-service:/tmp/foodflow-smoke.py
 docker compose exec -T cardapio-service python /tmp/foodflow-smoke.py --gateway http://gateway --prometheus http://prometheus:9090
 ```
@@ -256,7 +377,9 @@ O NGINX centraliza o acesso às APIs pela porta 8080.
 Usuário inicial:
 
 ```text
+
 admin
+
 ```
 
 Senha padrão da demonstração: `grafana-local`. O valor pode ser configurado em `GRAFANA_ADMIN_PASSWORD`.
@@ -293,18 +416,22 @@ As credenciais iniciais são aplicadas quando os respectivos serviços são conf
 As requisições devem ser realizadas pelo API Gateway:
 
 ```text
+
 http://localhost:8080
+
 ```
 
 ## 9. Exemplos de utilização
 
-Os exemplos `curl` com `\` como quebra de linha podem ser executados em Bash ou Git Bash. A interface web também permite executar esses passos diretamente no navegador.
+Os exemplos `curl` com `\\` como quebra de linha podem ser executados em Bash ou Git Bash. A interface web também permite executar esses passos diretamente no navegador.
 
 ### Cadastrar um produto
 
+**Git Bash:**
+
 ```bash
-curl -X POST http://localhost:8080/produtos \
-  -H "Content-Type: application/json" \
+curl -X POST http://localhost:8080/produtos \\
+  -H "Content-Type: application/json" \\
   -d '{
     "nome": "Pizza de Calabresa",
     "descricao": "Pizza grande com calabresa e queijo",
@@ -313,19 +440,42 @@ curl -X POST http://localhost:8080/produtos \
   }'
 ```
 
+**PowerShell:**
+
+```powershell
+$body = @{
+    nome = "Pizza de Calabresa"
+    descricao = "Pizza grande com calabresa e queijo"
+    preco = 45.90
+    disponivel = $true
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:8080/produtos" -Method Post -ContentType "application/json" -Body $body
+```
+
 ### Consultar produtos
+
+**Git Bash:**
 
 ```bash
 curl http://localhost:8080/produtos
+```
+
+**PowerShell:**
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/produtos" -Method Get
 ```
 
 ### Cadastrar um pedido
 
 Antes de executar, verifique o identificador de um produto cadastrado e disponível.
 
+**Git Bash:**
+
 ```bash
-curl -X POST http://localhost:8080/pedidos \
-  -H "Content-Type: application/json" \
+curl -X POST http://localhost:8080/pedidos \\
+  -H "Content-Type: application/json" \\
   -d '{
     "cliente": "Pedro",
     "itens": [
@@ -337,30 +487,69 @@ curl -X POST http://localhost:8080/pedidos \
   }'
 ```
 
+**PowerShell:**
+
+```powershell
+$body = @{
+    cliente = "Pedro"
+    itens = @(
+        @{ produto_id = 1; quantidade = 2 }
+    )
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod -Uri "http://localhost:8080/pedidos" -Method Post -ContentType "application/json" -Body $body
+```
+
 O preço não precisa ser informado.
 
 O microsserviço Node.js consulta o FastAPI para obter o preço oficial e calcular o valor total.
 
 ### Consultar pedidos
 
+**Git Bash:**
+
 ```bash
 curl http://localhost:8080/pedidos
+```
+
+**PowerShell:**
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/pedidos" -Method Get
 ```
 
 ### Atualizar o status
 
 Substitua o ID pelo identificador de um pedido existente.
 
+**Git Bash:**
+
 ```bash
-curl -X PUT http://localhost:8080/pedidos/1 \
-  -H "Content-Type: application/json" \
+curl -X PUT http://localhost:8080/pedidos/1 \\
+  -H "Content-Type: application/json" \\
   -d '{"status": "em preparo"}'
+```
+
+**PowerShell:**
+
+```powershell
+$body = @{ status = "em preparo" } | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:8080/pedidos/1" -Method Put -ContentType "application/json" -Body $body
 ```
 
 ### Consultar estatísticas
 
+**Git Bash:**
+
 ```bash
 curl http://localhost:8080/estatisticas
+```
+
+**PowerShell:**
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/estatisticas" -Method Get
 ```
 
 ## 10. Persistência de dados
@@ -371,18 +560,34 @@ Os dados são armazenados em volumes Docker.
 
 Para verificar o banco do Cardápio:
 
+**Git Bash:**
+
 ```bash
-docker compose exec cardapio-db \
-  psql -U cardapio_user -d cardapio_db \
+docker compose exec cardapio-db \\
+  psql -U cardapio_user -d cardapio_db \\
   -c "SELECT * FROM produtos;"
+```
+
+**PowerShell:**
+
+```powershell
+docker compose exec cardapio-db psql -U cardapio_user -d cardapio_db -c "SELECT * FROM produtos;"
 ```
 
 Para verificar o banco de Pedidos:
 
+**Git Bash:**
+
 ```bash
-docker compose exec pedidos-db \
-  psql -U pedidos_user -d pedidos_db \
+docker compose exec pedidos-db \\
+  psql -U pedidos_user -d pedidos_db \\
   -c "SELECT * FROM pedidos;"
+```
+
+**PowerShell:**
+
+```powershell
+docker compose exec pedidos-db psql -U pedidos_user -d pedidos_db -c "SELECT * FROM pedidos;"
 ```
 
 Para comprovar persistência, cadastre um produto e um pedido, guarde os IDs e execute `docker compose down` seguido de `docker compose up --wait --wait-timeout 240`. Consulte novamente os mesmos IDs pelo gateway. Os dois bancos montam seus respectivos volumes ao serem recriados.
@@ -406,26 +611,33 @@ Os alvos `cardapio` e `pedidos` deverão aparecer como UP quando estiverem dispo
 Disponibilidade:
 
 ```promql
+
 up
+
 ```
 
 Requisições por segundo:
 
 ```promql
+
 sum by (job) (rate(http_requests_total[1m]))
+
 ```
 
 Erros HTTP:
 
 ```promql
+
 sum by (job, status) (
   increase(http_requests_total{status=~"4..|5.."}[5m])
 )
+
 ```
 
 Tempo médio de resposta:
 
 ```promql
+
 sum by (job) (
   rate(http_request_duration_seconds_sum[1m])
 )
@@ -433,6 +645,7 @@ sum by (job) (
 sum by (job) (
   rate(http_request_duration_seconds_count[1m])
 )
+
 ```
 
 ### Painel do Grafana
@@ -448,14 +661,24 @@ Quando a API responde `201` com `evento_agendado: true`, o pedido e o evento já
 A fila utilizada é:
 
 ```text
+
 pedidos_criados
+
 ```
 
 O consumidor processa as mensagens e registra estatísticas no banco do Cardápio.
 
 ### Verificar os logs do consumidor
 
+**Git Bash:**
+
 ```bash
+docker compose logs -f cardapio-consumer
+```
+
+**PowerShell:**
+
+```powershell
 docker compose logs -f cardapio-consumer
 ```
 
@@ -463,7 +686,15 @@ docker compose logs -f cardapio-consumer
 
 Interrompa o consumidor:
 
+**Git Bash:**
+
 ```bash
+docker compose stop cardapio-consumer
+```
+
+**PowerShell:**
+
+```powershell
 docker compose stop cardapio-consumer
 ```
 
@@ -473,7 +704,15 @@ A mensagem poderá permanecer aguardando na fila RabbitMQ.
 
 Reinicie o consumidor:
 
+**Git Bash:**
+
 ```bash
+docker compose start cardapio-consumer
+```
+
+**PowerShell:**
+
+```powershell
 docker compose start cardapio-consumer
 ```
 
@@ -485,31 +724,71 @@ O publicador confirma a entrega ao broker antes de marcar o evento como publicad
 
 Para verificar os serviços:
 
+**Git Bash:**
+
 ```bash
+docker compose ps
+```
+
+**PowerShell:**
+
+```powershell
 docker compose ps
 ```
 
 Para consultar os logs do FastAPI:
 
+**Git Bash:**
+
 ```bash
+docker compose logs --tail=50 cardapio-service
+```
+
+**PowerShell:**
+
+```powershell
 docker compose logs --tail=50 cardapio-service
 ```
 
 Para consultar os logs do Node.js:
 
+**Git Bash:**
+
 ```bash
+docker compose logs --tail=50 pedidos-service
+```
+
+**PowerShell:**
+
+```powershell
 docker compose logs --tail=50 pedidos-service
 ```
 
 Para consultar os logs do RabbitMQ:
 
+**Git Bash:**
+
 ```bash
+docker compose logs --tail=50 rabbitmq
+```
+
+**PowerShell:**
+
+```powershell
 docker compose logs --tail=50 rabbitmq
 ```
 
 Para consultar os logs do consumidor:
 
+**Git Bash:**
+
 ```bash
+docker compose logs --tail=50 cardapio-consumer
+```
+
+**PowerShell:**
+
+```powershell
 docker compose logs --tail=50 cardapio-consumer
 ```
 
@@ -517,19 +796,36 @@ docker compose logs --tail=50 cardapio-consumer
 
 Para interromper e remover os contêineres, preservando os volumes:
 
+**Git Bash:**
+
 ```bash
+docker compose down
+```
+
+**PowerShell:**
+
+```powershell
 docker compose down
 ```
 
 Para iniciar novamente:
 
+**Git Bash:**
+
 ```bash
+docker compose up -d
+```
+
+**PowerShell:**
+
+```powershell
 docker compose up -d
 ```
 
 ## 15. Organização do projeto
 
 ```text
+
 foodflow/
 │
 ├── cardapio-service/
@@ -574,6 +870,7 @@ foodflow/
 ├── .env.example
 ├── .gitignore
 └── README.md
+
 ```
 
 ## 16. Requisitos acadêmicos atendidos
@@ -581,12 +878,21 @@ foodflow/
 O projeto contempla:
 
 - Dois microsserviços em linguagens diferentes.
+
 - CRUD completo nos dois serviços.
+
 - Bancos de dados independentes.
+
 - Conteinerização com Docker.
+
 - Orquestração com Docker Compose.
+
 - API Gateway com NGINX.
+
 - Comunicação REST/HTTP com JSON.
+
 - Observabilidade com Prometheus e Grafana.
+
 - Mensageria assíncrona com RabbitMQ.
+
 - Repositório público com código-fonte e documentação.
