@@ -64,7 +64,7 @@ services:
       DB_PASSWORD: ${PEDIDOS_DB_PASSWORD:-pedidos-local}
       CARDAPIO_URL: http://cardapio-service:8000
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBITMQ_USER:-foodflow}
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbitmq-local}
     networks:
       - default
@@ -132,7 +132,7 @@ services:
     ports:
       - "127.0.0.1:15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-foodflow}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-user}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-rabbitmq-local}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
@@ -154,7 +154,7 @@ services:
       DB_USER: cardapio_user
       DB_PASSWORD: ${CARDAPIO_DB_PASSWORD:-cardapio-local}
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBITMQ_USER:-foodflow}
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-rabbitmq-local}
     networks:
       - default

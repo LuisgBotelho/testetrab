@@ -386,7 +386,7 @@ Senha padrão da demonstração: `grafana-local`. O valor pode ser configurado e
 
 ### Acesso ao RabbitMQ
 
-Usuário `foodflow` e senha `rabbitmq-local` na configuração padrão. Ajuste `RABBITMQ_USER` e `RABBITMQ_PASSWORD` para personalizar.
+Usuário `user` e senha `rabbitmq-local` na configuração padrão. Ajuste `RABBITMQ_USER` e `RABBITMQ_PASSWORD` para personalizar.
 
 As credenciais iniciais são aplicadas quando os respectivos serviços são configurados pela primeira vez com volumes novos.
 
@@ -423,15 +423,15 @@ http://localhost:8080
 
 ## 9. Exemplos de utilização
 
-Os exemplos `curl` com `\\` como quebra de linha podem ser executados em Bash ou Git Bash. A interface web também permite executar esses passos diretamente no navegador.
+Os exemplos `curl` com `\` como quebra de linha podem ser executados em Bash ou Git Bash. A interface web também permite executar esses passos diretamente no navegador.
 
 ### Cadastrar um produto
 
 **Git Bash:**
 
 ```bash
-curl -X POST http://localhost:8080/produtos \\
-  -H "Content-Type: application/json" \\
+curl -X POST http://localhost:8080/produtos \
+  -H "Content-Type: application/json" \
   -d '{
     "nome": "Pizza de Calabresa",
     "descricao": "Pizza grande com calabresa e queijo",
@@ -474,8 +474,8 @@ Antes de executar, verifique o identificador de um produto cadastrado e disponí
 **Git Bash:**
 
 ```bash
-curl -X POST http://localhost:8080/pedidos \\
-  -H "Content-Type: application/json" \\
+curl -X POST http://localhost:8080/pedidos \
+  -H "Content-Type: application/json" \
   -d '{
     "cliente": "Pedro",
     "itens": [
@@ -525,8 +525,8 @@ Substitua o ID pelo identificador de um pedido existente.
 **Git Bash:**
 
 ```bash
-curl -X PUT http://localhost:8080/pedidos/1 \\
-  -H "Content-Type: application/json" \\
+curl -X PUT http://localhost:8080/pedidos/1 \
+  -H "Content-Type: application/json" \
   -d '{"status": "em preparo"}'
 ```
 
@@ -563,8 +563,8 @@ Para verificar o banco do Cardápio:
 **Git Bash:**
 
 ```bash
-docker compose exec cardapio-db \\
-  psql -U cardapio_user -d cardapio_db \\
+docker compose exec cardapio-db \
+  psql -U cardapio_user -d cardapio_db \
   -c "SELECT * FROM produtos;"
 ```
 
@@ -579,8 +579,8 @@ Para verificar o banco de Pedidos:
 **Git Bash:**
 
 ```bash
-docker compose exec pedidos-db \\
-  psql -U pedidos_user -d pedidos_db \\
+docker compose exec pedidos-db \
+  psql -U pedidos_user -d pedidos_db \
   -c "SELECT * FROM pedidos;"
 ```
 
@@ -843,6 +843,7 @@ foodflow/
 │   ├── init-db.js
 │   ├── cardapio.js
 │   ├── mensageria.js
+│   ├── outbox.js
 │   ├── metrics.js
 │   ├── package.json
 │   ├── package-lock.json
